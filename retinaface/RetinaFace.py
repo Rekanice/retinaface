@@ -130,28 +130,28 @@ def detect_faces(img_path, threshold=0.9, model = None, allow_upscaling = True):
         proposals_list.append(proposals)
         scores_list.append(scores)
 
-        landmark_deltas = net_out[sym_idx + 2]
-        landmark_pred_len = landmark_deltas.shape[3]//A
-        landmark_deltas = landmark_deltas.reshape((-1, 5, landmark_pred_len//5))
-        landmarks = postprocess.landmark_pred(anchors, landmark_deltas)
-        landmarks = landmarks[order, :]
+        # landmark_deltas = net_out[sym_idx + 2]
+        # landmark_pred_len = landmark_deltas.shape[3]//A
+        # landmark_deltas = landmark_deltas.reshape((-1, 5, landmark_pred_len//5))
+        # landmarks = postprocess.landmark_pred(anchors, landmark_deltas)
+        # landmarks = landmarks[order, :]
 
-        landmarks[:, :, 0:2] /= im_scale
-        landmarks_list.append(landmarks)
+        # landmarks[:, :, 0:2] /= im_scale
+        # landmarks_list.append(landmarks)
         sym_idx += 3
 
     proposals = np.vstack(proposals_list)
-    if proposals.shape[0]==0:
-        landmarks = np.zeros( (0,5,2) )
-        return np.zeros( (0,5) ), landmarks
+    # if proposals.shape[0]==0:
+    #     landmarks = np.zeros( (0,5,2) )
+    #     return np.zeros( (0,5) ), landmarks
     scores = np.vstack(scores_list)
     scores_ravel = scores.ravel()
     order = scores_ravel.argsort()[::-1]
 
     proposals = proposals[order, :]
     scores = scores[order]
-    landmarks = np.vstack(landmarks_list)
-    landmarks = landmarks[order].astype(np.float32, copy=False)
+    # landmarks = np.vstack(landmarks_list)
+    # landmarks = landmarks[order].astype(np.float32, copy=False)
 
     pre_det = np.hstack((proposals[:,0:4], scores)).astype(np.float32, copy=False)
 
@@ -161,23 +161,23 @@ def detect_faces(img_path, threshold=0.9, model = None, allow_upscaling = True):
 
     det = np.hstack( (pre_det, proposals[:,4:]) )
     det = det[keep, :]
-    landmarks = landmarks[keep]
+    # landmarks = landmarks[keep]
 
     resp = {}
     for idx, face in enumerate(det):
 
         label = 'face_'+str(idx+1)
         resp[label] = {}
-        resp[label]["score"] = face[4]
+        resp[label]["score"] = round(face[4],3)
 
         resp[label]["facial_area"] = list(face[0:4].astype(int))
 
-        resp[label]["landmarks"] = {}
-        resp[label]["landmarks"]["right_eye"] = list(landmarks[idx][0])
-        resp[label]["landmarks"]["left_eye"] = list(landmarks[idx][1])
-        resp[label]["landmarks"]["nose"] = list(landmarks[idx][2])
-        resp[label]["landmarks"]["mouth_right"] = list(landmarks[idx][3])
-        resp[label]["landmarks"]["mouth_left"] = list(landmarks[idx][4])
+        # resp[label]["landmarks"] = {}
+        # resp[label]["landmarks"]["right_eye"] = list(landmarks[idx][0])
+        # resp[label]["landmarks"]["left_eye"] = list(landmarks[idx][1])
+        # resp[label]["landmarks"]["nose"] = list(landmarks[idx][2])
+        # resp[label]["landmarks"]["mouth_right"] = list(landmarks[idx][3])
+        # resp[label]["landmarks"]["mouth_left"] = list(landmarks[idx][4])
 
     return resp
 
